@@ -105,16 +105,20 @@
   <!-- Slideshow container with 10 slides -->
   <div class="slideshow-container">
     <div class="slide active">
-      <h2>PSA Project</h2>
+      <h2>Unit 7 PSA Project</h2>
       <b>made by Zacarias Posey</b>
+      <p>Core 3</p>
+      <p id="datetime"></p>
     </div>
     <div class="slide">
-      <h2>Slide 2 Title</h2>
-      <p>Placeholder content for slide 2.</p>
+      <h2>Monkeys Paw</h2>
+      <img src="https://schoolworkhelper.net/wp-content/uploads/2011/07/the-monkeys-paw.jpg" alt="W. W. Jacobs’ The Monkey’s Paw: Summary &amp; Analysis - SchoolWorkHelper"/>
     </div>
     <div class="slide">
-      <h2>Slide 3 Title</h2>
-      <p>Placeholder content for slide 3.</p>
+      <h2>Summary</h2>
+      <p>A family receives a cursed monkey’s paw that grants wishes, but each wish comes with tragic consequences.</p>
+      <p>Despite warnings, Mr. White wishes for £200, unknowingly setting fate into motion.</p>
+      <p>The paw moves, foreshadowing the horrors to come.</p>
     </div>
     <div class="slide">
       <h2>Slide 4 Title</h2>
@@ -247,5 +251,14 @@
       }
     });
   </script>
+  <script>
+    function updateDateTime() {
+    var now = new Date();
+    var date = now.toLocaleDateString();
+    var time = now.toLocaleTimeString();
+    document.getElementById('datetime').innerHTML = date + " " + time;
+    }
+    setInterval(updateDateTime, 1000);
+    </script>
 </body>
 </html>
