@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Project</title>
+  <style>
+    /* Global Reset & Full-Screen Settings */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #333; /* Dark grey background */
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    /* Particles.js Container */
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+
+    /* Slideshow Container (overlays particles) */
+    .slideshow-container {
+      position: relative;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Presentation Card (Acrylic Style) */
+    .slide {
+      width: 80%;
+      height: 70%;
+      background: rgba(255, 255, 255, 0.4);  /* Dark grey with 30% opacity */
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 15px;
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      opacity: 0;
+    }
+    /* The active slide is visible */
+    .slide.active {
+      opacity: 0.75;
+    }
+
+    /* -----------------------------------------
+       Slide Animations
+       ----------------------------------------- */
+    @keyframes slideInUp {
+      from { transform: translateY(100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes slideOutUp {
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(-100%); opacity: 0; }
+    }
+    @keyframes slideInDown {
+      from { transform: translateY(-100%); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    @keyframes slideOutDown {
+      from { transform: translateY(0); opacity: 1; }
+      to { transform: translateY(100%); opacity: 0; }
+    }
+
+    .slide.slide-in-up {
+      animation: slideInUp 0.8s forwards;
+    }
+    .slide.slide-out-up {
+      animation: slideOutUp 0.8s forwards;
+    }
+    .slide.slide-in-down {
+      animation: slideInDown 0.8s forwards;
+    }
+    .slide.slide-out-down {
+      animation: slideOutDown 0.8s forwards;
+    }
+  </style>
+</head>
+<body>
+  <!-- Particles.js container -->
+  <div id="particles-js"></div>
+
+  <!-- Slideshow container with 10 slides -->
+  <div class="slideshow-container">
+    <div class="slide active">
+      <h2>PSA Project</h2>
+      <b>made by Zacarias Posey</b>
+    </div>
+    <div class="slide">
+      <h2>Slide 2 Title</h2>
+      <p>Placeholder content for slide 2.</p>
+    </div>
+    <div class="slide">
+      <h2>Slide 3 Title</h2>
+      <p>Placeholder content for slide 3.</p>
+    </div>
+    <div class="slide">
+      <h2>Slide 4 Title</h2>
+      <p>Placeholder content for slide 4.</p>
+    </div>
+    <div class="slide">
+      <h2>Slide 5 Title</h2>
+      <p>Placeholder content for slide 5.</p>
+    </div>
+    <div class="slide">
+      <h2>Slide 6 Title</h2>
+      <p>Placeholder content for slide 6.</p>
+    </div>
+    <div class="slide">
+      <h2>Slide 7 Title</h2>
+      <p>Placeholder content for slide 7.</p>
+    </div>
+    <div class="slide">
+      <h2>Slide 8 Title</h2>
+      <p>Placeholder content for slide 8.</p>
+    </div>
+    <div class="slide">
+      <h2>Slide 9 Title</h2>
+      <p>Placeholder content for slide 9.</p>
+    </div>
+    <div class="slide">
+      <h2>Slide 10 Title</h2>
+      <p>Placeholder content for slide 10.</p>
+    </div>
+  </div>
+
+  <!-- Include particles.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+
+  <script>
+    /* ------------------------------------------------
+       Initialize particles.js (Dynamic Background)
+       ------------------------------------------------ */
+    particlesJS("particles-js", {
+      "particles": {
+        "number": {
+          "value": 100,
+          "density": {
+            "enable": true,
+            "value_area": 800
+          }
+        },
+        "color": {
+          "value": "#c8c8c8"
+        },
+        "shape": {
+          "type": "circle"
+        },
+        "opacity": {
+          "value": 0.5,
+          "random": false
+        },
+        "size": {
+          "value": 3,
+          "random": true
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#c8c8c8",
+          "opacity": 0.5,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 2,
+          "direction": "none",
+          "random": false,
+          "straight": false,
+          "out_mode": "bounce",
+          "bounce": false
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": false
+          },
+          "onclick": {
+            "enable": false
+          },
+          "resize": true
+        }
+      },
+      "retina_detect": true
+    });
+
+    /* ------------------------------------------------
+       Slideshow Functionality with Animations
+       ------------------------------------------------ */
+    let slideIndex = 0;
+    const slides = document.querySelectorAll('.slide');
+
+    function animateSlides(newIndex, direction) {
+      if (newIndex === slideIndex) return;
+      
+      const currentSlide = slides[slideIndex];
+      const nextSlide = slides[newIndex];
+
+      if (direction === 'down') {
+        currentSlide.classList.add('slide-out-up');
+        nextSlide.classList.add('active', 'slide-in-up');
+      } else if (direction === 'up') {
+        currentSlide.classList.add('slide-out-down');
+        nextSlide.classList.add('active', 'slide-in-down');
+      }
+
+      nextSlide.addEventListener('animationend', function handler() {
+        currentSlide.classList.remove('active', 'slide-out-up', 'slide-out-down');
+        nextSlide.classList.remove('slide-in-up', 'slide-in-down');
+        nextSlide.removeEventListener('animationend', handler);
+      });
+
+      slideIndex = newIndex;
+    }
+
+    window.addEventListener('keydown', function (e) {
+      if (e.key === "ArrowDown") {
+        const newIndex = (slideIndex + 1) % slides.length;
+        animateSlides(newIndex, 'down');
+      } else if (e.key === "ArrowUp") {
+        const newIndex = (slideIndex - 1 + slides.length) % slides.length;
+        animateSlides(newIndex, 'up');
+      }
+    });
+  </script>
+</body>
+</html>
