@@ -31,15 +31,18 @@
     }
     /* Acrylic style card with 0.75 opacity using RGBA for background (so text stays opaque) */
     .acrylic-card {
-      background-color: #666464;
-      max-width: 800px;
-      margin: 80px auto;
+        position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.75);  /* Acrylic-style white */
       padding: 40px;
       border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+      z-index: 2;
       text-align: center;
-      opacity: 0.7;
     }
+    
     h1 {
       margin-bottom: 10px;
       font-size: 2.5em;
@@ -79,8 +82,8 @@
     <h1>Learnhelp.cc web tools</h1>
     <h2>random things you dont need but you want</h2>
     <div class="button-group">
-      <a href="~/english/home.html">School Presentaions</a>
-      <a href="~/countdown/countdown.html">School Countdown</a>
+      <a href="/english/home.html">School Presentaions</a>
+      <a href="/countdown/countdown.html">School Countdown</a>
     </div>
   </div>
 
