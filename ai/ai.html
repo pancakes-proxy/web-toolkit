@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Dark Themed AI Chatbot with Context & Error Displays</title>
+  <title>AI chat | Learnhelp web toolkit</title>
   <style>
     /* Global dark theme */
     body {
@@ -63,7 +63,7 @@
       outline: none;
       background: transparent;
       font-size: 1em;
-      color: #000; /* dark text for clarity on white area */
+      color: #000;
     }
     #send-btn {
       background: #fff;
@@ -123,7 +123,6 @@
       margin: 10px 0 5px;
     }
     #settings-modal input,
-    #settings-modal select,
     #settings-modal textarea {
       width: 100%;
       padding: 5px;
@@ -172,15 +171,6 @@
       <input type="text" id="api-key-input" placeholder="Enter your Together AI API key">
     </div>
     <div>
-      <label for="model-select">Model:</label>
-      <select id="model-select">
-        <option value="gpt-3">GPT-3</option>
-        <option value="gpt-3.5">GPT-3.5</option>
-        <option value="gpt-4">GPT-4</option>
-        <!-- Add additional models as needed -->
-      </select>
-    </div>
-    <div>
       <label for="max-tokens-input">Max Tokens:</label>
       <input type="number" id="max-tokens-input" value="150">
     </div>
@@ -196,9 +186,11 @@
   </div>
 
   <script>
+    // Fixed model value
+    const fixedModel = "google/gemma-3-27b-it";
+
     // Retrieve stored settings or assign defaults.
     let apiKey       = localStorage.getItem('together_ai_api_key') || '';
-    let model        = localStorage.getItem('together_ai_model') || 'gpt-3';
     let maxTokens    = localStorage.getItem('together_ai_max_tokens') || 150;
     let temperature  = localStorage.getItem('together_ai_temperature') || 0.7;
     let systemPrompt = localStorage.getItem('together_ai_system_prompt') || '';
@@ -217,7 +209,6 @@
 
     // Pre-populate the settings modal fields with stored values.
     document.getElementById('api-key-input').value        = apiKey;
-    document.getElementById('model-select').value         = model;
     document.getElementById('max-tokens-input').value       = maxTokens;
     document.getElementById('temp-input').value           = temperature;
     document.getElementById('system-prompt-input').value    = systemPrompt;
@@ -231,13 +222,11 @@
     });
     saveSettingsBtn.addEventListener('click', () => {
       apiKey       = document.getElementById('api-key-input').value.trim();
-      model        = document.getElementById('model-select').value;
       maxTokens    = document.getElementById('max-tokens-input').value;
       temperature  = document.getElementById('temp-input').value;
       systemPrompt = document.getElementById('system-prompt-input').value.trim();
       
       localStorage.setItem('together_ai_api_key', apiKey);
-      localStorage.setItem('together_ai_model', model);
       localStorage.setItem('together_ai_max_tokens', maxTokens);
       localStorage.setItem('together_ai_temperature', temperature);
       localStorage.setItem('together_ai_system_prompt', systemPrompt);
@@ -298,11 +287,11 @@
         appendMessage('error', 'API key is missing. Please set your API key in Settings.');
         return;
       }
-      const url = 'https://api.together.ai/chat'; // Update with the proper endpoint
-  
+      
+      const url = 'https://api.together.ai/v1/chat/completions';
       const payload = {
         prompt: prompt,
-        model: model,
+        model: fixedModel,
         max_tokens: parseInt(maxTokens),
         temperature: parseFloat(temperature)
       };
@@ -325,12 +314,11 @@
         return data.reply || "No reply received.";
       } catch (error) {
         console.error(error);
-        // Update the placeholder bot message with an error message styled differently.
         return "Error: " + error.message;
       }
     }
 
-    // Render conversation history when the page loads.
+    // Render any existing conversation history on load.
     renderConversation();
 
     // Handle sending a message.
