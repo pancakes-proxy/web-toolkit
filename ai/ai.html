@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dark Themed AI Chatbot with Context & Error Displays</title>
+  <style>
+    /* Global dark theme */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: relative;
+    }
+    /* Chat container styling */
+    #chat-container {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      border: 1px solid #000;
+    }
+    .message {
+      margin-bottom: 15px;
+      padding: 10px;
+      border-radius: 5px;
+      max-width: 80%;
+      word-wrap: break-word;
+    }
+    .message.user {
+      background-color: #333;
+      align-self: flex-end;
+      text-align: right;
+    }
+    .message.bot {
+      background-color: #444;
+      align-self: flex-start;
+      text-align: left;
+    }
+    /* Error message styling */
+    .message.error {
+      background-color: #8B0000; /* dark red */
+      color: #fff;
+      border: 1px solid #ff6347;
+      align-self: center;
+      text-align: center;
+    }
+    /* Input area styling with acrylic effect */
+    #input-area {
+      position: relative;
+      background: rgba(255, 255, 255, 0.75);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      padding: 10px;
+      display: flex;
+      align-items: center;
+    }
+    #chat-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      background: transparent;
+      font-size: 1em;
+      color: #000; /* dark text for clarity on white area */
+    }
+    #send-btn {
+      background: #fff;
+      opacity: 0.75;
+      color: #000;
+      border: none;
+      padding: 5px 10px;
+      margin-left: 10px;
+      cursor: pointer;
+      font-size: 1em;
+    }
+    /* Settings button in the upper right corner */
+    #settings-btn {
+      background: #fff;
+      opacity: 0.75;
+      color: #000;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 10;
+    }
+    /* Clear conversation button in the upper left corner */
+    #clear-convo-btn {
+      background: #fff;
+      opacity: 0.75;
+      color: #000;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      z-index: 10;
+    }
+    /* Settings modal styling */
+    #settings-modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #222;
+      border: 2px solid #fff;
+      padding: 20px;
+      z-index: 100;
+      display: none;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.75);
+      width: 300px;
+    }
+    #settings-modal h2 {
+      margin-top: 0;
+    }
+    #settings-modal label {
+      display: block;
+      margin: 10px 0 5px;
+    }
+    #settings-modal input,
+    #settings-modal select,
+    #settings-modal textarea {
+      width: 100%;
+      padding: 5px;
+      margin-bottom: 10px;
+      box-sizing: border-box;
+    }
+    #close-settings {
+      background: #fff;
+      opacity: 0.75;
+      color: #000;
+      border: none;
+      padding: 5px;
+      cursor: pointer;
+      float: right;
+    }
+    #save-settings {
+      background: #fff;
+      opacity: 0.75;
+      color: #000;
+      border: none;
+      padding: 5px 10px;
+      cursor: pointer;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+  <button id="clear-convo-btn">Clear Conversation</button>
+  <button id="settings-btn">Settings</button>
+  
+  <div id="chat-container">
+    <!-- Chat messages will appear here -->
+  </div>
+  
+  <div id="input-area">
+    <input type="text" id="chat-input" placeholder="Type your message..." />
+    <button id="send-btn">Send</button>
+  </div>
+
+  <!-- Settings Modal -->
+  <div id="settings-modal">
+    <button id="close-settings">X</button>
+    <h2>Settings</h2>
+    <div>
+      <label for="api-key-input">API Key:</label>
+      <input type="text" id="api-key-input" placeholder="Enter your Together AI API key">
+    </div>
+    <div>
+      <label for="model-select">Model:</label>
+      <select id="model-select">
+        <option value="gpt-3">GPT-3</option>
+        <option value="gpt-3.5">GPT-3.5</option>
+        <option value="gpt-4">GPT-4</option>
+        <!-- Add additional models as needed -->
+      </select>
+    </div>
+    <div>
+      <label for="max-tokens-input">Max Tokens:</label>
+      <input type="number" id="max-tokens-input" value="150">
+    </div>
+    <div>
+      <label for="temp-input">Temperature:</label>
+      <input type="number" id="temp-input" value="0.7" step="0.1" min="0" max="1">
+    </div>
+    <div>
+      <label for="system-prompt-input">System Prompt / Context:</label>
+      <textarea id="system-prompt-input" placeholder="Enter context for the conversation..." rows="3"></textarea>
+    </div>
+    <button id="save-settings">Save Settings</button>
+  </div>
+
+  <script>
+    // Retrieve stored settings or assign defaults.
+    let apiKey       = localStorage.getItem('together_ai_api_key') || '';
+    let model        = localStorage.getItem('together_ai_model') || 'gpt-3';
+    let maxTokens    = localStorage.getItem('together_ai_max_tokens') || 150;
+    let temperature  = localStorage.getItem('together_ai_temperature') || 0.7;
+    let systemPrompt = localStorage.getItem('together_ai_system_prompt') || '';
+
+    // Load existing conversation history or initialize a new one.
+    let conversationHistory = JSON.parse(localStorage.getItem('conversation_history')) || [];
+
+    const chatContainer     = document.getElementById('chat-container');
+    const chatInput         = document.getElementById('chat-input');
+    const sendBtn           = document.getElementById('send-btn');
+    const settingsBtn       = document.getElementById('settings-btn');
+    const settingsModal     = document.getElementById('settings-modal');
+    const closeSettingsBtn  = document.getElementById('close-settings');
+    const saveSettingsBtn   = document.getElementById('save-settings');
+    const clearConvoBtn     = document.getElementById('clear-convo-btn');
+
+    // Pre-populate the settings modal fields with stored values.
+    document.getElementById('api-key-input').value        = apiKey;
+    document.getElementById('model-select').value         = model;
+    document.getElementById('max-tokens-input').value       = maxTokens;
+    document.getElementById('temp-input').value           = temperature;
+    document.getElementById('system-prompt-input').value    = systemPrompt;
+
+    // Toggle settings modal visibility.
+    settingsBtn.addEventListener('click', () => {
+      settingsModal.style.display = 'block';
+    });
+    closeSettingsBtn.addEventListener('click', () => {
+      settingsModal.style.display = 'none';
+    });
+    saveSettingsBtn.addEventListener('click', () => {
+      apiKey       = document.getElementById('api-key-input').value.trim();
+      model        = document.getElementById('model-select').value;
+      maxTokens    = document.getElementById('max-tokens-input').value;
+      temperature  = document.getElementById('temp-input').value;
+      systemPrompt = document.getElementById('system-prompt-input').value.trim();
+      
+      localStorage.setItem('together_ai_api_key', apiKey);
+      localStorage.setItem('together_ai_model', model);
+      localStorage.setItem('together_ai_max_tokens', maxTokens);
+      localStorage.setItem('together_ai_temperature', temperature);
+      localStorage.setItem('together_ai_system_prompt', systemPrompt);
+
+      alert('Settings saved!');
+      settingsModal.style.display = 'none';
+    });
+
+    // Save the conversation history to local storage.
+    function saveConversationHistory() {
+      localStorage.setItem('conversation_history', JSON.stringify(conversationHistory));
+    }
+
+    // Render the full conversation in the chat container.
+    function renderConversation() {
+      chatContainer.innerHTML = '';
+      conversationHistory.forEach(message => {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message', message.sender);
+        messageDiv.textContent = message.text;
+        chatContainer.appendChild(messageDiv);
+      });
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Append a new message to both the conversation history and UI.
+    function appendMessage(sender, text) {
+      conversationHistory.push({ sender, text });
+      renderConversation();
+      saveConversationHistory();
+    }
+
+    // Build a prompt that includes (optionally) a system context and the full conversation.
+    function buildChatPrompt() {
+      let prompt = "";
+      if(systemPrompt.trim() !== "") {
+        prompt += "System: " + systemPrompt.trim() + "\n";
+      }
+      conversationHistory.forEach(m => {
+        prompt += (m.sender === 'user' ? "User: " : "AI: ") + m.text + "\n";
+      });
+      return prompt;
+    }
+
+    // Clear the conversation history.
+    clearConvoBtn.addEventListener('click', () => {
+      if (confirm('Are you sure you want to clear the conversation?')) {
+        conversationHistory = [];
+        saveConversationHistory();
+        renderConversation();
+      }
+    });
+
+    // Make a call to the Together AI API, sending the full conversation as context.
+    async function callTogetherAI(prompt) {
+      if (!apiKey) {
+        // Display API key error directly in the chat.
+        appendMessage('error', 'API key is missing. Please set your API key in Settings.');
+        return;
+      }
+      const url = 'https://api.together.ai/chat'; // Update with the proper endpoint
+  
+      const payload = {
+        prompt: prompt,
+        model: model,
+        max_tokens: parseInt(maxTokens),
+        temperature: parseFloat(temperature)
+      };
+  
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + apiKey
+          },
+          body: JSON.stringify(payload)
+        });
+  
+        if (!response.ok) {
+          throw new Error('API request failed with status: ' + response.status);
+        }
+        const data = await response.json();
+        // Assuming the API returns an object with a "reply" field.
+        return data.reply || "No reply received.";
+      } catch (error) {
+        console.error(error);
+        // Update the placeholder bot message with an error message styled differently.
+        return "Error: " + error.message;
+      }
+    }
+
+    // Render conversation history when the page loads.
+    renderConversation();
+
+    // Handle sending a message.
+    sendBtn.addEventListener('click', async () => {
+      const userMessage = chatInput.value.trim();
+      if (userMessage === '') return;
+      appendMessage('user', userMessage);
+      chatInput.value = '';
+  
+      // Add a placeholder “Thinking...” message.
+      appendMessage('bot', 'Thinking...');
+      const lastBotIndex = conversationHistory.length - 1;
+  
+      // Build the full context-aware prompt.
+      const fullPrompt = buildChatPrompt();
+      const botReply = await callTogetherAI(fullPrompt);
+  
+      // Update the placeholder message.
+      if(botReply.startsWith("Error:")) {
+        conversationHistory[lastBotIndex] = { sender: "error", text: botReply };
+      } else {
+        conversationHistory[lastBotIndex] = { sender: "bot", text: botReply };
+      }
+      renderConversation();
+      saveConversationHistory();
+    });
+  
+    // Allow sending the message via the Enter key.
+    chatInput.addEventListener('keyup', (event) => {
+      if (event.key === 'Enter') {
+        sendBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
