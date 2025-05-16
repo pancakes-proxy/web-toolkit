@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Learnhelp.cc web tools</title>
+  <!-- Include particles.js from CDN -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <style>
+    /* Ensure the full screen is used and remove default margin/padding */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      font-family: Arial, sans-serif;
+      color: black;
+    }
+    /* Particles container that sits behind everything */
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      top: 0;
+      left: 0;
+    }
+    /* Acrylic style card with 0.75 opacity using RGBA for background (so text stays opaque) */
+    .acrylic-card {
+      background: rgba(255, 255, 255, 0.75);
+      max-width: 800px;
+      margin: 80px auto;
+      padding: 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+      text-align: center;
+    }
+    h1 {
+      margin-bottom: 10px;
+      font-size: 2.5em;
+    }
+    h2 {
+      margin-bottom: 30px;
+      font-size: 1.5em;
+      font-weight: normal;
+    }
+    /* Button container styling */
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 15px;
+    }
+    .button-group a {
+      text-decoration: none;
+      padding: 10px 20px;
+      background: #ddd;
+      border-radius: 4px;
+      font-weight: bold;
+      color: black;
+      transition: background 0.3s;
+    }
+    .button-group a:hover {
+      background: #ccc;
+    }
+  </style>
+</head>
+<body>
+  <!-- Particle background -->
+  <div id="particles-js"></div>
+
+  <!-- Acrylic Card Container -->
+  <div class="acrylic-card">
+    <h1>Learnhelp.cc web tools</h1>
+    <h2>random things you dont need but you want</h2>
+    <div class="button-group">
+      <a href="~/english/home.html">School Presentaions</a>
+      <a href="~/countdown/countdown.html">School Countdown</a>
+    </div>
+  </div>
+
+  <!-- Initialize particles.js with a basic configuration -->
+  <script>
+    particlesJS("particles-js", {
+      "particles": {
+        "number": {
+          "value": 80,
+          "density": {
+            "enable": true,
+            "value_area": 800
+          }
+        },
+        "color": {
+          "value": "#ffffff"
+        },
+        "shape": {
+          "type": "circle",
+          "stroke": {
+            "width": 0,
+            "color": "#000000"
+          },
+          "polygon": {
+            "nb_sides": 5
+          }
+        },
+        "opacity": {
+          "value": 0.5,
+          "anim": {
+            "enable": false
+          }
+        },
+        "size": {
+          "value": 3,
+          "random": true,
+          "anim": {
+            "enable": false
+          }
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#ffffff",
+          "opacity": 0.4,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 6,
+          "direction": "none",
+          "out_mode": "out"
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": true,
+            "mode": "repulse"
+          },
+          "onclick": {
+            "enable": true,
+            "mode": "push"
+          }
+        },
+        "modes": {
+          "repulse": {
+            "distance": 200,
+            "duration": 0.4
+          },
+          "push": {
+            "particles_nb": 4
+          }
+        }
+      },
+      "retina_detect": true
+    });
+  </script>
+</body>
+</html>
