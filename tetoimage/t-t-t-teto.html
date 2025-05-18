@@ -129,13 +129,13 @@
 
     // Add an event listener to load a random Kasane Teto image when the button is clicked
     document.getElementById('loadButton').addEventListener('click', function() {
-      // API URL from Safebooru for posts with tag "kasane_teto"
-      const apiUrl = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&tags=kasane_teto&limit=100';
+      // Correct API URL: json=1 at the end
+      const apiUrl = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=kasane_teto&limit=100&json=1';
 
       // Use a CORS proxy to avoid cross-origin restrictions.
-      // Here we use Thingproxy: https://thingproxy.freeboard.io/
+      // Thingproxy expects the full URL appended directly.
       const proxyUrl = 'https://thingproxy.freeboard.io/fetch/';
-      const fullUrl = proxyUrl + apiUrl;
+      const fullUrl = proxyUrl + encodeURIComponent(apiUrl);
 
       fetch(fullUrl)
         .then(response => {
@@ -145,6 +145,11 @@
           return response.json();
         })
         .then(data => {
+          // If using Thingproxy, data is the proxied response, so check for .contents
+          if (data && data.contents) {
+            // Parse the JSON string in .contents
+            data = JSON.parse(data.contents);
+          }
           if (Array.isArray(data) && data.length > 0) {
             // Select a random post from the returned array
             const randomIndex = Math.floor(Math.random() * data.length);
