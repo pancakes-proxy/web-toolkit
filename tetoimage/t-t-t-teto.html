@@ -57,9 +57,12 @@
     #tetoImage {
       display: none;
       margin-top: 20px;
-      max-width: 100%;
+      max-width: 90vw;
+      max-height: 70vh;
+      width: auto;
       height: auto;
       border-radius: 5px;
+      object-fit: contain;
     }
   </style>
 </head>
@@ -130,10 +133,15 @@
     // Add an event listener to load a Kasane Teto image from slipstreamm.dev
     document.getElementById('loadButton').addEventListener('click', function() {
       const apiUrl = 'https://slipstreamm.dev/teto';
-      // Directly set the image src to the API endpoint; browser will follow the redirect
       const img = document.getElementById('tetoImage');
-      img.src = apiUrl;
-      img.style.display = "block";
+      // Hide and clear the previous image before loading a new one
+      img.style.display = "none";
+      img.src = "";
+      // Set a new image after a short delay to ensure the old one is cleared
+      setTimeout(() => {
+        img.src = apiUrl;
+        img.style.display = "block";
+      }, 50);
     });
   </script>
 </body>
