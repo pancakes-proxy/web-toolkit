@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Web Toolkit | random teto image</title>
+  <title>Web Toolkit | Teto </title>
   <!-- Load particles.js library via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <style>
-    /* Reset defaults and setup the full viewport */
+    /* Reset defaults and make the background fill the viewport */
     html, body {
       margin: 0;
       padding: 0;
@@ -16,14 +16,14 @@
       font-family: Arial, sans-serif;
       overflow: hidden;
     }
-    /* Container for particles.js background */
+    /* Container for the particles.js background */
     #particles-js {
       position: absolute;
       width: 100%;
       height: 100%;
       z-index: 1;
     }
-    /* The acrylic card styling */
+    /* Acrylic card styling */
     .acrylic-card {
       position: absolute;
       top: 50%;
@@ -39,7 +39,7 @@
       text-align: center;
       max-width: 90%;
     }
-    /* Basic button styling */
+    /* Button styling */
     button {
       padding: 10px 20px;
       font-size: 16px;
@@ -75,7 +75,7 @@
   </div>
 
   <script>
-    // Initialize particles.js with a sample configuration
+    // Initialize particles.js configuration
     particlesJS("particles-js", {
       "particles": {
         "number": {
@@ -127,19 +127,26 @@
       "retina_detect": true
     });
 
-    // Add an event listener to the button for fetching a random Kasane Teto image
+    // Add an event listener to load a random Kasane Teto image when the button is clicked
     document.getElementById('loadButton').addEventListener('click', function() {
-      // Construct the API URL using parameters from the documentation:
-      // - json=1 for JSON formatted response
-      // - tags=kasane_teto to filter by Kasane Teto images
-      // - limit=100 to retrieve up to 100 posts
+      // API URL from Safebooru for posts with tag "kasane_teto"
       const apiUrl = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&tags=kasane_teto&limit=100';
 
-      fetch(apiUrl)
-        .then(response => response.json())
+      // Use a CORS proxy to avoid cross-origin restrictions.
+      // Here we use Thingproxy: https://thingproxy.freeboard.io/
+      const proxyUrl = 'https://thingproxy.freeboard.io/fetch/';
+      const fullUrl = proxyUrl + apiUrl;
+
+      fetch(fullUrl)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          return response.json();
+        })
         .then(data => {
           if (Array.isArray(data) && data.length > 0) {
-            // Pick a random post from the returned array of image data
+            // Select a random post from the returned array
             const randomIndex = Math.floor(Math.random() * data.length);
             const randomPost = data[randomIndex];
             if (randomPost && randomPost.file_url) {
@@ -149,7 +156,7 @@
               console.error("No file_url found in the selected post.");
             }
           } else {
-            console.error("No posts returned from the API. The search might be down.");
+            console.error("No posts returned from the API. The API might be down or the search returned no results.");
           }
         })
         .catch(error => console.error("Error fetching the image:", error));
