@@ -290,12 +290,17 @@
       
       const url = 'https://api.together.ai/v1/chat/completions';
       const payload = {
-        prompt: prompt,
         model: fixedModel,
+        messages: [
+          {
+            role: "user",
+            content: prompt
+          }
+        ],
         max_tokens: parseInt(maxTokens),
         temperature: parseFloat(temperature)
       };
-  
+
       try {
         const response = await fetch(url, {
           method: 'POST',
@@ -305,13 +310,12 @@
           },
           body: JSON.stringify(payload)
         });
-  
+
         if (!response.ok) {
           throw new Error('API request failed with status: ' + response.status);
         }
         const data = await response.json();
-        // Assuming the API returns an object with a "reply" field.
-        return data.reply || "No reply received.";
+        return data.choices[0].message.content || "No reply received.";
       } catch (error) {
         console.error(error);
         return "Error: " + error.message;
