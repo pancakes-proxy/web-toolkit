@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Password Strength Checker</title>
-  <!-- Importing a clean sans-serif font -->
+  <title>Web Toolkit | Password Strength Checker</title>
+  <!-- Import a clean sans-serif font -->
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
   <style>
-    /* Global resets and font setup */
+    /* Global resets */
     * {
       box-sizing: border-box;
     }
@@ -17,13 +17,13 @@
       height: 100%;
       font-family: 'Roboto', sans-serif;
     }
-    /* Set the black background and hide any scroll bars */
+    /* Black background with hidden scrollbars */
     body {
       background-color: #000;
       overflow: hidden;
       position: relative;
     }
-    /* Particles container covering the full background */
+    /* Fullscreen container for particles.js */
     #particles-js {
       position: absolute;
       top: 0;
@@ -32,7 +32,7 @@
       height: 100%;
       z-index: 1;
     }
-    /* Acrylic card styling (75% opacity with frosted-glass effect) */
+    /* Acrylic card styling */
     .card {
       position: relative;
       z-index: 2;
@@ -81,12 +81,12 @@
   </style>
 </head>
 <body>
-  <!-- Container for the particle background -->
+  <!-- Particle background -->
   <div id="particles-js"></div>
   
-  <!-- Acrylic card with the password strength checker -->
+  <!-- Acrylic card with the password checker -->
   <div class="card">
-    <h2>Password Strength Checker</h2>
+    <h2>Web ToolKit Password Strength Checker</h2>
     <input type="password" id="password" placeholder="Enter your password">
     <div class="strength-meter">
       <div class="strength-meter-fill" id="strength-meter-fill"></div>
@@ -94,40 +94,24 @@
     <div id="strength-text">Enter a password</div>
   </div>
 
-  <!-- Include the particles.js library from a CDN -->
+  <!-- particles.js library -->
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <script>
-    // Initialize particles.js with a configuration
+    // Initialize particles.js background
     particlesJS("particles-js", {
       "particles": {
         "number": {
           "value": 80,
-          "density": {
-            "enable": true,
-            "value_area": 800
-          }
+          "density": { "enable": true, "value_area": 800 }
         },
-        "color": {
-          "value": "#ffffff"
-        },
+        "color": { "value": "#ffffff" },
         "shape": {
           "type": "circle",
-          "stroke": {
-            "width": 0,
-            "color": "#000000"
-          },
-          "polygon": {
-            "nb_sides": 5
-          }
+          "stroke": { "width": 0, "color": "#000000" },
+          "polygon": { "nb_sides": 5 }
         },
-        "opacity": {
-          "value": 0.5,
-          "random": false
-        },
-        "size": {
-          "value": 3,
-          "random": true
-        },
+        "opacity": { "value": 0.5, "random": false },
+        "size": { "value": 3, "random": true },
         "line_linked": {
           "enable": true,
           "distance": 150,
@@ -147,77 +131,65 @@
       "interactivity": {
         "detect_on": "canvas",
         "events": {
-          "onhover": {
-            "enable": true,
-            "mode": "grab"
-          },
-          "onclick": {
-            "enable": true,
-            "mode": "push"
-          },
+          "onhover": { "enable": true, "mode": "grab" },
+          "onclick": { "enable": true, "mode": "push" },
           "resize": true
         },
         "modes": {
-          "grab": {
-            "distance": 140,
-            "line_linked": {
-              "opacity": 1
-            }
-          },
-          "bubble": {
-            "distance": 400,
-            "size": 40,
-            "duration": 2,
-            "opacity": 8
-          },
-          "repulse": {
-            "distance": 200,
-            "duration": 0.4
-          },
-          "push": {
-            "particles_nb": 4
-          },
-          "remove": {
-            "particles_nb": 2
-          }
+          "grab": { "distance": 140, "line_linked": { "opacity": 1 } },
+          "bubble": { "distance": 400, "size": 40, "duration": 2, "opacity": 8 },
+          "repulse": { "distance": 200, "duration": 0.4 },
+          "push": { "particles_nb": 4 },
+          "remove": { "particles_nb": 2 }
         }
       },
       "retina_detect": true
     });
   </script>
   
-  <!-- JavaScript for the password strength checker -->
+  <!-- JavaScript for password strength and common password check -->
   <script>
     const passwordInput = document.getElementById('password');
     const strengthMeterFill = document.getElementById('strength-meter-fill');
     const strengthText = document.getElementById('strength-text');
+    
+    // Global variable to store common passwords as a Set
+    let commonPasswords = null;
+
+    // Fetch the rockyou.txt file and load it into a Set for fast lookup.
+    // Note: Due to cross-origin restrictions, you might need to host the file locally or via a CORS proxy.
+    fetch('https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt')
+      .then(response => response.text())
+      .then(text => {
+        const passwordsArray = text.split('\n').map(pwd => pwd.trim()).filter(pwd => pwd !== "");
+        commonPasswords = new Set(passwordsArray);
+        console.log('Common passwords dictionary loaded:', commonPasswords.size, 'entries.');
+      })
+      .catch(error => console.error('Error loading common passwords:', error));
 
     passwordInput.addEventListener('input', () => {
       const password = passwordInput.value;
       const strength = calculatePasswordStrength(password);
-      updateStrengthDisplay(strength);
+      updateStrengthDisplay(strength, password);
     });
 
-    // Simple scoring based on length and character diversity
+    // Simple score based on length and presence of different character types
     function calculatePasswordStrength(password) {
       let strength = 0;
-
       if (password.length >= 8) strength++;
       if (/[A-Z]/.test(password)) strength++;
       if (/[a-z]/.test(password)) strength++;
       if (/[0-9]/.test(password)) strength++;
       if (/[^A-Za-z0-9]/.test(password)) strength++;
-
       return strength;
     }
 
-    function updateStrengthDisplay(strength) {
-      const percentage = (strength / 5) * 100;
-      strengthMeterFill.style.width = percentage + '%';
-
+    function updateStrengthDisplay(strength, password) {
+      let percentage = (strength / 5) * 100;
       let label = "";
       let color = "";
 
+      // Determine label and color based on calculated strength
       switch (strength) {
         case 0:
         case 1:
@@ -245,6 +217,15 @@
           color = "red";
       }
 
+      // If the common password dictionary is loaded and the password is found in it,
+      // override the label and meter to warn the user.
+      if (commonPasswords && commonPasswords.has(password)) {
+        label = "Very Weak (Common)";
+        color = "red";
+        percentage = 0;
+      }
+
+      strengthMeterFill.style.width = percentage + '%';
       strengthMeterFill.style.backgroundColor = color;
       strengthText.textContent = label;
     }
