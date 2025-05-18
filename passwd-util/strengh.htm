@@ -1,29 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Web Toolkit | Password Strength Checker</title>
-  <!-- Import a clean sans-serif font -->
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Password Strength Checker</title>
+  <!-- Importing the Roboto font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet" />
   <style>
-    /* Global resets */
     * {
       box-sizing: border-box;
     }
-    html, body {
+    html,
+    body {
       margin: 0;
       padding: 0;
       height: 100%;
       font-family: 'Roboto', sans-serif;
     }
-    /* Black background with hidden scrollbars */
     body {
       background-color: #000;
       overflow: hidden;
       position: relative;
     }
-    /* Fullscreen container for particles.js */
     #particles-js {
       position: absolute;
       top: 0;
@@ -32,7 +30,6 @@
       height: 100%;
       z-index: 1;
     }
-    /* Acrylic card styling */
     .card {
       position: relative;
       z-index: 2;
@@ -59,7 +56,6 @@
       border-radius: 5px;
       margin-bottom: 15px;
     }
-    /* Password strength meter styling */
     .strength-meter {
       width: 100%;
       height: 10px;
@@ -83,27 +79,24 @@
 <body>
   <!-- Particle background -->
   <div id="particles-js"></div>
-  
-  <!-- Acrylic card with the password checker -->
+
+  <!-- Acrylic card with the password strength checker -->
   <div class="card">
-    <h2>Web ToolKit Password Strength Checker</h2>
-    <input type="password" id="password" placeholder="Enter your password">
+    <h2>Password Strength Checker</h2>
+    <input type="password" id="password" placeholder="Enter your password" />
     <div class="strength-meter">
       <div class="strength-meter-fill" id="strength-meter-fill"></div>
     </div>
     <div id="strength-text">Enter a password</div>
   </div>
 
-  <!-- particles.js library -->
+  <!-- Include particles.js from CDN -->
   <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
   <script>
-    // Initialize particles.js background
+    // Initialize particles.js with basic configuration
     particlesJS("particles-js", {
       "particles": {
-        "number": {
-          "value": 80,
-          "density": { "enable": true, "value_area": 800 }
-        },
+        "number": { "value": 80, "density": { "enable": true, "value_area": 800 } },
         "color": { "value": "#ffffff" },
         "shape": {
           "type": "circle",
@@ -147,33 +140,31 @@
     });
   </script>
   
-  <!-- JavaScript for password strength and common password check -->
+  <!-- JavaScript for password strength and API-based RockYou check -->
   <script>
     const passwordInput = document.getElementById('password');
     const strengthMeterFill = document.getElementById('strength-meter-fill');
     const strengthText = document.getElementById('strength-text');
-    
-    // Global variable to store common passwords as a Set
-    let commonPasswords = null;
 
-    // Fetch the rockyou.txt file and load it into a Set for fast lookup.
-    // Note: Due to cross-origin restrictions, you might need to host the file locally or via a CORS proxy.
-    fetch('https://github.com/brannondorsey/naive-hashcat/releases/download/data/rockyou.txt')
-      .then(response => response.text())
-      .then(text => {
-        const passwordsArray = text.split('\n').map(pwd => pwd.trim()).filter(pwd => pwd !== "");
-        commonPasswords = new Set(passwordsArray);
-        console.log('Common passwords dictionary loaded:', commonPasswords.size, 'entries.');
-      })
-      .catch(error => console.error('Error loading common passwords:', error));
+    // To avoid making too many API calls in quick succession, use debounce
+    let checkTimeout = null;
 
     passwordInput.addEventListener('input', () => {
       const password = passwordInput.value;
+      // Calculate and display client-side strength based on basic tests
       const strength = calculatePasswordStrength(password);
-      updateStrengthDisplay(strength, password);
+      updateStrengthDisplay(strength);
+
+      // Debounce the API call for checking against RockYou
+      if (checkTimeout) clearTimeout(checkTimeout);
+      if (password.trim() !== "") {
+        checkTimeout = setTimeout(() => {
+          checkCommonPassword(password);
+        }, 500);
+      }
     });
 
-    // Simple score based on length and presence of different character types
+    // Basic password strength calculation based on length and character types
     function calculatePasswordStrength(password) {
       let strength = 0;
       if (password.length >= 8) strength++;
@@ -184,12 +175,12 @@
       return strength;
     }
 
-    function updateStrengthDisplay(strength, password) {
+    // Update the meter display based on client-side calculated strength
+    function updateStrengthDisplay(strength) {
       let percentage = (strength / 5) * 100;
       let label = "";
       let color = "";
 
-      // Determine label and color based on calculated strength
       switch (strength) {
         case 0:
         case 1:
@@ -216,18 +207,33 @@
           label = "Enter a password";
           color = "red";
       }
-
-      // If the common password dictionary is loaded and the password is found in it,
-      // override the label and meter to warn the user.
-      if (commonPasswords && commonPasswords.has(password)) {
-        label = "Very Weak (Common)";
-        color = "red";
-        percentage = 0;
-      }
-
       strengthMeterFill.style.width = percentage + '%';
       strengthMeterFill.style.backgroundColor = color;
       strengthText.textContent = label;
+    }
+
+    // Check password against RockYou common password API
+    function checkCommonPassword(password) {
+      // POST request to the RockYou API endpoint
+      fetch("https://slipstreamm.dev/rockyou", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ password: password })
+      })
+      .then(response => response.json())
+      .then(result => {
+        // Make sure the returned password matches the current field value
+        if (passwordInput.value === result.password && result.found_in_rockyou) {
+          strengthMeterFill.style.width = '0%';
+          strengthMeterFill.style.backgroundColor = 'red';
+          strengthText.textContent = result.message;
+        }
+      })
+      .catch(error => {
+        console.error("Error calling slipstream API:", error);
+      });
     }
   </script>
 </body>
