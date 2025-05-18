@@ -127,44 +127,13 @@
       "retina_detect": true
     });
 
-    // Add an event listener to load a random Kasane Teto image when the button is clicked
+    // Add an event listener to load a Kasane Teto image from slipstreamm.dev
     document.getElementById('loadButton').addEventListener('click', function() {
-      // Correct API URL: json=1 at the end
-      const apiUrl = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&tags=kasane_teto&limit=100&json=1';
-
-      // Use a CORS proxy to avoid cross-origin restrictions.
-      // Thingproxy expects the full URL appended directly.
-      const proxyUrl = 'https://thingproxy.freeboard.io/fetch/';
-      const fullUrl = proxyUrl + encodeURIComponent(apiUrl);
-
-      fetch(fullUrl)
-        .then(response => {
-          if (!response.ok) {
-            throw new Error("Network response was not ok");
-          }
-          return response.json();
-        })
-        .then(data => {
-          // If using Thingproxy, data is the proxied response, so check for .contents
-          if (data && data.contents) {
-            // Parse the JSON string in .contents
-            data = JSON.parse(data.contents);
-          }
-          if (Array.isArray(data) && data.length > 0) {
-            // Select a random post from the returned array
-            const randomIndex = Math.floor(Math.random() * data.length);
-            const randomPost = data[randomIndex];
-            if (randomPost && randomPost.file_url) {
-              document.getElementById('tetoImage').src = randomPost.file_url;
-              document.getElementById('tetoImage').style.display = "block";
-            } else {
-              console.error("No file_url found in the selected post.");
-            }
-          } else {
-            console.error("No posts returned from the API. The API might be down or the search returned no results.");
-          }
-        })
-        .catch(error => console.error("Error fetching the image:", error));
+      const apiUrl = 'https://slipstreamm.dev/teto';
+      // Directly set the image src to the API endpoint; browser will follow the redirect
+      const img = document.getElementById('tetoImage');
+      img.src = apiUrl;
+      img.style.display = "block";
     });
   </script>
 </body>
