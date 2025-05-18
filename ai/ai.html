@@ -259,16 +259,24 @@
       saveConversationHistory();
     }
 
-    // Build a prompt that includes (optionally) a system context and the full conversation.
-    function buildChatPrompt() {
-      let prompt = "";
-      if(systemPrompt.trim() !== "") {
-        prompt += "System: " + systemPrompt.trim() + "\n";
+    // Build the messages array for Together AI chat API.
+    function buildMessages() {
+      const messages = [];
+      if (systemPrompt.trim() !== "") {
+        messages.push({
+          role: "system",
+          content: systemPrompt.trim()
+        });
       }
       conversationHistory.forEach(m => {
-        prompt += (m.sender === 'user' ? "User: " : "AI: ") + m.text + "\n";
+        if (m.sender === "user") {
+          messages.push({ role: "user", content: m.text });
+        } else if (m.sender === "bot") {
+          messages.push({ role: "assistant", content: m.text });
+        }
+        // skip error messages
       });
-      return prompt;
+      return messages;
     }
 
     // Clear the conversation history.
@@ -281,22 +289,17 @@
     });
 
     // Make a call to the Together AI API, sending the full conversation as context.
-    async function callTogetherAI(prompt) {
+    async function callTogetherAI() {
       if (!apiKey) {
         // Display API key error directly in the chat.
         appendMessage('error', 'API key is missing. Please set your API key in Settings.');
         return;
       }
-      
+
       const url = 'https://api.together.ai/v1/chat/completions';
       const payload = {
         model: fixedModel,
-        messages: [
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
+        messages: buildMessages(),
         max_tokens: parseInt(maxTokens),
         temperature: parseFloat(temperature)
       };
@@ -312,7 +315,8 @@
         });
 
         if (!response.ok) {
-          throw new Error('API request failed with status: ' + response.status);
+          const errorText = await response.text();
+          throw new Error('API request failed with status: ' + response.status + ' - ' + errorText);
         }
         const data = await response.json();
         return data.choices[0].message.content || "No reply received.";
@@ -336,9 +340,8 @@
       appendMessage('bot', 'Thinking...');
       const lastBotIndex = conversationHistory.length - 1;
   
-      // Build the full context-aware prompt.
-      const fullPrompt = buildChatPrompt();
-      const botReply = await callTogetherAI(fullPrompt);
+      // Call the API with the full conversation as messages.
+      const botReply = await callTogetherAI();
   
       // Update the placeholder message.
       if(botReply.startsWith("Error:")) {
