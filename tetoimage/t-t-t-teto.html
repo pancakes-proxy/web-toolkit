@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Web Toolkit | random teto image</title>
+  <!-- Load particles.js library via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <style>
+    /* Reset defaults and setup the full viewport */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #000;
+      font-family: Arial, sans-serif;
+      overflow: hidden;
+    }
+    /* Container for particles.js background */
+    #particles-js {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    /* The acrylic card styling */
+    .acrylic-card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.75); /* 75% opacity */
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      z-index: 2;
+      text-align: center;
+      max-width: 90%;
+    }
+    /* Basic button styling */
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      border-radius: 5px;
+      background-color: #007BFF;
+      color: #fff;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    /* Styling for the image */
+    #tetoImage {
+      display: none;
+      margin-top: 20px;
+      max-width: 100%;
+      height: auto;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <!-- Particles.js background container -->
+  <div id="particles-js"></div>
+  
+  <!-- Acrylic card container -->
+  <div class="acrylic-card">
+    <button id="loadButton">Kasane teto image</button>
+    <br>
+    <img id="tetoImage" src="" alt="Kasane Teto Image">
+  </div>
+
+  <script>
+    // Initialize particles.js with a sample configuration
+    particlesJS("particles-js", {
+      "particles": {
+        "number": {
+          "value": 80,
+          "density": {
+            "enable": true,
+            "value_area": 800
+          }
+        },
+        "color": {
+          "value": "#ffffff"
+        },
+        "shape": {
+          "type": "circle"
+        },
+        "opacity": {
+          "value": 0.5,
+          "random": false
+        },
+        "size": {
+          "value": 3,
+          "random": true
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#ffffff",
+          "opacity": 0.4,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 6,
+          "direction": "none",
+          "random": false,
+          "straight": false,
+          "out_mode": "out"
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": true,
+            "mode": "repulse"
+          }
+        }
+      },
+      "retina_detect": true
+    });
+
+    // Add an event listener to the button for fetching a random Kasane Teto image
+    document.getElementById('loadButton').addEventListener('click', function() {
+      // Construct the API URL using parameters from the documentation:
+      // - json=1 for JSON formatted response
+      // - tags=kasane_teto to filter by Kasane Teto images
+      // - limit=100 to retrieve up to 100 posts
+      const apiUrl = 'https://safebooru.org/index.php?page=dapi&s=post&q=index&json=1&tags=kasane_teto&limit=100';
+
+      fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+          if (Array.isArray(data) && data.length > 0) {
+            // Pick a random post from the returned array of image data
+            const randomIndex = Math.floor(Math.random() * data.length);
+            const randomPost = data[randomIndex];
+            if (randomPost && randomPost.file_url) {
+              document.getElementById('tetoImage').src = randomPost.file_url;
+              document.getElementById('tetoImage').style.display = "block";
+            } else {
+              console.error("No file_url found in the selected post.");
+            }
+          } else {
+            console.error("No posts returned from the API. The search might be down.");
+          }
+        })
+        .catch(error => console.error("Error fetching the image:", error));
+    });
+  </script>
+</body>
+</html>
