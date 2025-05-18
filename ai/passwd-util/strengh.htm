@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Password Strength Checker</title>
+  <!-- Importing a clean sans-serif font -->
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    /* Global resets and font setup */
+    * {
+      box-sizing: border-box;
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Roboto', sans-serif;
+    }
+    /* Set the black background and hide any scroll bars */
+    body {
+      background-color: #000;
+      overflow: hidden;
+      position: relative;
+    }
+    /* Particles container covering the full background */
+    #particles-js {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+    /* Acrylic card styling (75% opacity with frosted-glass effect) */
+    .card {
+      position: relative;
+      z-index: 2;
+      background: rgba(255, 255, 255, 0.75);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(7px);
+      -webkit-backdrop-filter: blur(7px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      width: 320px;
+      margin: 100px auto;
+      padding: 20px;
+      text-align: center;
+    }
+    .card h2 {
+      color: #333;
+      margin-bottom: 20px;
+    }
+    .card input[type="password"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      margin-bottom: 15px;
+    }
+    /* Password strength meter styling */
+    .strength-meter {
+      width: 100%;
+      height: 10px;
+      background-color: #ddd;
+      border-radius: 5px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .strength-meter-fill {
+      width: 0%;
+      height: 100%;
+      background-color: red;
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+    #strength-text {
+      font-size: 14px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <!-- Container for the particle background -->
+  <div id="particles-js"></div>
+  
+  <!-- Acrylic card with the password strength checker -->
+  <div class="card">
+    <h2>Password Strength Checker</h2>
+    <input type="password" id="password" placeholder="Enter your password">
+    <div class="strength-meter">
+      <div class="strength-meter-fill" id="strength-meter-fill"></div>
+    </div>
+    <div id="strength-text">Enter a password</div>
+  </div>
+
+  <!-- Include the particles.js library from a CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
+  <script>
+    // Initialize particles.js with a configuration
+    particlesJS("particles-js", {
+      "particles": {
+        "number": {
+          "value": 80,
+          "density": {
+            "enable": true,
+            "value_area": 800
+          }
+        },
+        "color": {
+          "value": "#ffffff"
+        },
+        "shape": {
+          "type": "circle",
+          "stroke": {
+            "width": 0,
+            "color": "#000000"
+          },
+          "polygon": {
+            "nb_sides": 5
+          }
+        },
+        "opacity": {
+          "value": 0.5,
+          "random": false
+        },
+        "size": {
+          "value": 3,
+          "random": true
+        },
+        "line_linked": {
+          "enable": true,
+          "distance": 150,
+          "color": "#ffffff",
+          "opacity": 0.4,
+          "width": 1
+        },
+        "move": {
+          "enable": true,
+          "speed": 6,
+          "direction": "none",
+          "random": false,
+          "straight": false,
+          "out_mode": "out"
+        }
+      },
+      "interactivity": {
+        "detect_on": "canvas",
+        "events": {
+          "onhover": {
+            "enable": true,
+            "mode": "grab"
+          },
+          "onclick": {
+            "enable": true,
+            "mode": "push"
+          },
+          "resize": true
+        },
+        "modes": {
+          "grab": {
+            "distance": 140,
+            "line_linked": {
+              "opacity": 1
+            }
+          },
+          "bubble": {
+            "distance": 400,
+            "size": 40,
+            "duration": 2,
+            "opacity": 8
+          },
+          "repulse": {
+            "distance": 200,
+            "duration": 0.4
+          },
+          "push": {
+            "particles_nb": 4
+          },
+          "remove": {
+            "particles_nb": 2
+          }
+        }
+      },
+      "retina_detect": true
+    });
+  </script>
+  
+  <!-- JavaScript for the password strength checker -->
+  <script>
+    const passwordInput = document.getElementById('password');
+    const strengthMeterFill = document.getElementById('strength-meter-fill');
+    const strengthText = document.getElementById('strength-text');
+
+    passwordInput.addEventListener('input', () => {
+      const password = passwordInput.value;
+      const strength = calculatePasswordStrength(password);
+      updateStrengthDisplay(strength);
+    });
+
+    // Simple scoring based on length and character diversity
+    function calculatePasswordStrength(password) {
+      let strength = 0;
+
+      if (password.length >= 8) strength++;
+      if (/[A-Z]/.test(password)) strength++;
+      if (/[a-z]/.test(password)) strength++;
+      if (/[0-9]/.test(password)) strength++;
+      if (/[^A-Za-z0-9]/.test(password)) strength++;
+
+      return strength;
+    }
+
+    function updateStrengthDisplay(strength) {
+      const percentage = (strength / 5) * 100;
+      strengthMeterFill.style.width = percentage + '%';
+
+      let label = "";
+      let color = "";
+
+      switch (strength) {
+        case 0:
+        case 1:
+          label = "Very Weak";
+          color = "red";
+          break;
+        case 2:
+          label = "Weak";
+          color = "orange";
+          break;
+        case 3:
+          label = "Medium";
+          color = "yellow";
+          break;
+        case 4:
+          label = "Strong";
+          color = "lightgreen";
+          break;
+        case 5:
+          label = "Very Strong";
+          color = "green";
+          break;
+        default:
+          label = "Enter a password";
+          color = "red";
+      }
+
+      strengthMeterFill.style.backgroundColor = color;
+      strengthText.textContent = label;
+    }
+  </script>
+</body>
+</html>
