@@ -54,6 +54,15 @@
       font-weight: 800;
       margin: 0;
     }
+    
+    /* Selector styling */
+    #district-select {
+      margin-top: 20px;
+      font-size: 1em;
+      padding: 5px 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
   </style>
 </head>
 <body>
@@ -66,6 +75,11 @@
     <h1 class="countdown-timer" id="countdown">Loading Countdown...</h1>
     <hr>
     <sub>Made by Zacarias Posey and izzy with the help of @pancakes-proxy on github</sub>
+    <br>
+    <!-- School district selector -->
+    <select id="district-select">
+      <option value="">Select School District</option>
+    </select>
   </div>
   
   <script>
@@ -117,25 +131,23 @@
       "retina_detect": true
     });
     
-    // Helper function to determine if a date should be counted.
-    // Excludes weekends (Saturday:6, Sunday:0) and May 26th.
+    // Helper function to determine if a date is a valid school day (excludes weekends and May 26)
     function isValidDate(date) {
       const day = date.getDay(); // Sunday = 0, Saturday = 6
       if (day === 0 || day === 6) return false;
-      // Note: In JavaScript, months are zero-based. May is month 4.
+      // JavaScript months are zero-based; May is month 4.
       if (date.getMonth() === 4 && date.getDate() === 26) return false;
       return true;
     }
     
-    // Calculate the "effective" milliseconds between start and end,
-    // counting only time on valid days (weekdays not on May 26th).
+    // Calculates the effective milliseconds between start and end, discounting non-school days.
     function getEffectiveTime(start, end) {
       if (start >= end) return 0;
       
       let effectiveMs = 0;
       let current = new Date(start);
       
-      // If start and end are on the same day:
+      // If start and end fall on the same day.
       if (
         current.getFullYear() === end.getFullYear() &&
         current.getMonth() === end.getMonth() &&
@@ -147,26 +159,25 @@
         return effectiveMs;
       }
       
-      // First day: from 'start' to the end of the day (23:59:59.999)
+      // First day: from the current time until the end of the day.
       if (isValidDate(current)) {
         const endOfDay = new Date(current.getFullYear(), current.getMonth(), current.getDate(), 23, 59, 59, 999);
         effectiveMs += (endOfDay - current + 1);
       }
       
-      // Move to the next day at midnight
+      // Move to the next day at midnight.
       current = new Date(current.getFullYear(), current.getMonth(), current.getDate() + 1);
       
-      // Loop over full days between start and the target day.
+      // Loop through full days until the target day.
       const targetDayMidnight = new Date(end.getFullYear(), end.getMonth(), end.getDate());
       while (current < targetDayMidnight) {
         if (isValidDate(current)) {
-          // Add a full day's worth of milliseconds (24 hours)
           effectiveMs += 24 * 60 * 60 * 1000;
         }
         current = new Date(current.getFullYear(), current.getMonth(), current.getDate() + 1);
       }
       
-      // Last day: from midnight to the target time
+      // Last day: from midnight to the target time.
       if (isValidDate(end)) {
         const beginningOfEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate());
         effectiveMs += (end - beginningOfEnd);
@@ -175,37 +186,113 @@
       return effectiveMs;
     }
     
-    // Countdown update function using the effective time left.
+    // Global variable that holds the current countdown target.
+    let currentTarget = null;
+    
+    // Computes the target Date from an end_date string in "MM-DD" format.
+    // Uses the event time 14:45:00; if that date has passed this year, it sets for next year.
+    function getTargetDate(endDateStr) {
+      const [monthStr, dayStr] = endDateStr.split('-');
+      const month = parseInt(monthStr, 10) - 1;  // JavaScript months are zero-indexed.
+      const day = parseInt(dayStr, 10);
+      let year = (new Date()).getFullYear();
+      let target = new Date(year, month, day, 14, 45, 0);
+      if (new Date() > target) {
+        target = new Date(year + 1, month, day, 14, 45, 0);
+      }
+      return target;
+    }
+    
+    // Countdown update function: calculates effective time remaining and refreshes the display.
     function updateCountdown() {
       const now = new Date();
-      // Set the target date; here we assume June 10, 2025 at 14:45:00.
-      const target = new Date("June 10, 2025 14:45:00");
+      // Fallback: if no school district is selected, use a default target.
+      if (!currentTarget) {
+        currentTarget = new Date("June 10, 2025 14:45:00");
+      }
       
-      // If the current time is past the target, end the countdown.
-      if (now >= target) {
+      if (now >= currentTarget) {
         document.getElementById("countdown").innerHTML = "Event has started!";
         clearInterval(timerInterval);
         return;
       }
       
-      // Get effective milliseconds left excluding weekends and May 26.
-      const effectiveMs = getEffectiveTime(now, target);
+      // Compute the effective remaining milliseconds, discounting non-school days.
+      const effectiveMs = getEffectiveTime(now, currentTarget);
       
-      // Convert effectiveMs to seconds, minutes, hours, days.
+      // Convert effective time to days, hours, minutes, seconds.
       const totalSeconds = Math.floor(effectiveMs / 1000);
       const days = Math.floor(totalSeconds / (3600 * 24));
       const hours = Math.floor((totalSeconds % (3600 * 24)) / 3600);
       const minutes = Math.floor((totalSeconds % 3600) / 60);
       const seconds = totalSeconds % 60;
       
-      // Update the countdown display
       document.getElementById("countdown").innerHTML =
         days + "d " + hours + "h " + minutes + "m " + seconds + "s";
     }
     
-    // Initial call and then update every second
+    // Start the countdown loop.
     updateCountdown();
     const timerInterval = setInterval(updateCountdown, 1000);
+    
+    // Hardcoded school districts list.
+    const schoolDistrictData = {
+      "school_districts": [
+        { "id": 1, "name": "New York City School District", "end_date": "06-30" },
+        { "id": 2, "name": "Los Angeles Unified School District", "end_date": "06-30" },
+        { "id": 3, "name": "Chicago Public Schools", "end_date": "06-30" },
+        { "id": 4, "name": "Houston Independent School District", "end_date": "06-30" },
+        { "id": 5, "name": "Phoenix Union High School District", "end_date": "06-30" },
+        { "id": 6, "name": "Philadelphia City School District", "end_date": "06-30" },
+        { "id": 7, "name": "San Diego Unified School District", "end_date": "06-30" },
+        { "id": 8, "name": "Dallas Independent School District", "end_date": "06-30" },
+        { "id": 9, "name": "San Antonio Independent School District", "end_date": "06-30" },
+        { "id": 10, "name": "San Jose Unified School District", "end_date": "06-30" },
+        { "id": 11, "name": "Austin Independent School District", "end_date": "06-30" },
+        { "id": 12, "name": "Jacksonville Public Schools", "end_date": "06-30" },
+        { "id": 13, "name": "San Francisco Unified School District", "end_date": "06-30" },
+        { "id": 14, "name": "Indianapolis Public Schools", "end_date": "06-30" },
+        { "id": 15, "name": "Columbus City Schools", "end_date": "06-30" },
+        { "id": 16, "name": "Fort Worth Independent School District", "end_date": "06-30" },
+        { "id": 17, "name": "Charlotte-Mecklenburg Schools", "end_date": "06-30" },
+        { "id": 18, "name": "Memphis City Schools", "end_date": "06-30" },
+        { "id": 19, "name": "Boston Public Schools", "end_date": "06-30" },
+        { "id": 20, "name": "Baltimore City Public Schools", "end_date": "06-30" },
+        { "id": 21, "name": "Detroit Public Schools", "end_date": "06-30" },
+        { "id": 22, "name": "El Paso Independent School District", "end_date": "06-30" },
+        { "id": 23, "name": "Milwaukee Public Schools", "end_date": "06-30" },
+        { "id": 24, "name": "Seattle Public Schools", "end_date": "06-30" },
+        { "id": 25, "name": "Denver Public Schools", "end_date": "06-30" },
+        { "id": 26, "name": "Washington D.C. Public Schools", "end_date": "06-30" },
+        { "id": 27, "name": "Nashville Public Schools", "end_date": "06-30" },
+        { "id": 28, "name": "Kansas City Public Schools", "end_date": "06-30" },
+        { "id": 29, "name": "Newport News Public Schools", "end_date": "06-10" },
+        { "id": 30, "name": "Atlanta Public Schools", "end_date": "06-30" },
+        { "id": 31, "name": "Miami-Dade County Public Schools", "end_date": "06-30" }
+      ]
+    };
+    
+    // Populate the school district selector using the hardcoded list.
+    const districts = schoolDistrictData.school_districts;
+    const select = document.getElementById('district-select');
+    districts.forEach(district => {
+      const option = document.createElement('option');
+      option.value = district.end_date; // e.g., "06-30" or "06-10"
+      option.textContent = district.name;
+      select.appendChild(option);
+    });
+    
+    // Set the default district if available.
+    if (districts.length > 0) {
+      select.value = districts[0].end_date;
+      currentTarget = getTargetDate(districts[0].end_date);
+    }
+    
+    // Listen for changes and update the countdown target accordingly.
+    select.addEventListener('change', () => {
+      const selectedEndDate = select.value;
+      currentTarget = getTargetDate(selectedEndDate);
+    });
   </script>
 </body>
 </html>
